@@ -19,13 +19,13 @@ import { LinkPreset } from "./types/config";
 // 移除i18n导入以避免循环依赖
 
 // 定义站点语言
-const SITE_LANG = "en"; // 语言代码，例如：'en', 'zh_CN', 'ja' 等。
+const SITE_LANG = "zh_CN"; // 语言代码，例如：'en', 'zh_CN', 'ja' 等。
 const SITE_TIMEZONE = 8; //设置你的网站时区 from -12 to 12 default in UTC+8
 export const siteConfig: SiteConfig = {
 	title: "Mizuki",
-	subtitle: "One demo website",
+	subtitle: "L1ngg's Blog",
 	siteURL: "https://mizuki.mysqil.com/", // 请替换为你的站点URL，以斜杠结尾
-	siteStartDate: "2025-01-01", // 站点开始运行日期，用于站点统计组件计算运行天数
+	siteStartDate: "2026-01-16", // 站点开始运行日期，用于站点统计组件计算运行天数
 
 	timeZone: SITE_TIMEZONE,
 
@@ -51,7 +51,7 @@ export const siteConfig: SiteConfig = {
 	// 顶栏标题配置
 	navbarTitle: {
 		// 顶栏标题文本
-		text: "MizukiUI",
+		text: "L1ngg の 小窝",
 		// 顶栏标题图标路径，默认使用 public/assets/home/home.png
 		icon: "assets/home/home.png",
 	},
@@ -137,7 +137,7 @@ export const siteConfig: SiteConfig = {
 
 		homeText: {
 			enable: true, // 在主页显示自定义文本
-			title: "美しいミズキ", // 主页横幅主标题
+			title: "L1ngg's Home", // 主页横幅主标题
 
 			subtitle: [
 				"特別なことはないけど、君がいると十分です",
@@ -145,6 +145,7 @@ export const siteConfig: SiteConfig = {
 				"君ってさ、知らないうちに私の毎日になってたよ",
 				"君と話すと、なんか毎日がちょっと楽しくなるんだ",
 				"今日はなんでもない日。でも、ちょっとだけいい日",
+				"愿你所想皆所得",
 			],
 			typewriter: {
 				enable: true, // 启用副标题打字机效果
@@ -246,21 +247,21 @@ export const navBarConfig: NavBarConfig = {
 			children: [
 				{
 					name: "GitHub",
-					url: "https://github.com/matsuzaka-yuki/Mizuki",
+					url: "https://github.com/L-1ngg",
 					external: true,
 					icon: "fa6-brands:github",
 				},
 				{
 					name: "Bilibili",
-					url: "https://space.bilibili.com/701864046",
+					url: "https://space.bilibili.com/1821333518",
 					external: true,
 					icon: "fa6-brands:bilibili",
 				},
 				{
-					name: "Gitee",
-					url: "https://gitee.com/matsuzakayuki/Mizuki",
+					name: "Codeforces",
+					url: "https://codeforces.com/profile/L1ngg",
 					external: true,
-					icon: "mdi:git",
+					icon: "simple-icons:codeforces",
 				},
 			],
 		},
@@ -336,8 +337,8 @@ export const navBarConfig: NavBarConfig = {
 
 export const profileConfig: ProfileConfig = {
 	avatar: "assets/images/avatar.webp", // 相对于 /src 目录。如果以 '/' 开头，则相对于 /public 目录
-	name: "Matsuzaka Yuki",
-	bio: "The world is big, you have to go and see",
+	name: "L1nggのsocial media",
+	bio: "I Love you!",
 	typewriter: {
 		enable: true, // 启用个人简介打字机效果
 		speed: 80, // 打字速度（毫秒）
@@ -346,28 +347,28 @@ export const profileConfig: ProfileConfig = {
 		{
 			name: "Bilibli",
 			icon: "fa6-brands:bilibili",
-			url: "https://space.bilibili.com/701864046",
+			url: "https://space.bilibili.com/1821333518",
 		},
 		{
 			name: "Gitee",
 			icon: "mdi:git",
-			url: "https://gitee.com/matsuzakayuki",
+			url: "https://gitee.com/L1ngg",
 		},
 		{
 			name: "GitHub",
 			icon: "fa6-brands:github",
-			url: "https://github.com/matsuzaka-yuki",
+			url: "https://github.com/L-1ngg",
 		},
 		{
-			name: "Codeberg",
-			icon: "simple-icons:codeberg",
-			url: "https://codeberg.org",
+			name: "Codeforces",
+			icon: "simple-icons:codeforces",
+			url: "https://codeforces.com/profile/L1ngg",
 		},
-		{
-			name: "Discord",
-			icon: "fa6-brands:discord",
-			url: "https://discord.gg/MqW6TcQtVM",
-		},
+		// {
+		// 	name: "Discord",
+		// 	icon: "fa6-brands:discord",
+		// 	url: "https://discord.gg/MqW6TcQtVM",
+		// },
 	],
 };
 
@@ -425,7 +426,7 @@ export const shareConfig: ShareConfig = {
 
 export const announcementConfig: AnnouncementConfig = {
 	title: "Announcement", // 公告标题
-	content: "Welcome to my blog! This is a sample announcement.", // 公告内容
+	content: "Welcome to my blog!", // 公告内容
 	closable: true, // 允许用户关闭公告
 	link: {
 		enable: true, // 启用链接
@@ -525,7 +526,7 @@ export const sidebarLayoutConfig: SidebarLayoutConfig = {
 			// 组件显示顺序
 			order: 5,
 			// 组件位置："sticky" 表示粘性定位
-			position: "top",
+			position: "sticky",
 			// 所在侧边栏
 			sidebar: "left",
 			// CSS 类名
@@ -597,7 +598,7 @@ export const sidebarLayoutConfig: SidebarLayoutConfig = {
 		//hidden:不显示侧边栏(桌面端)   drawer:抽屉模式(移动端不显示)   sidebar:显示侧边栏
 		layout: {
 			// 移动端：抽屉模式
-			mobile: "sidebar",
+			mobile: "drawer",
 			// 平板端：显示侧边栏
 			tablet: "sidebar",
 			// 桌面端：显示侧边栏
@@ -649,11 +650,12 @@ export const pioConfig: import("./types/config").PioConfig = {
 			"Stop touching me!",
 			"HENTAI!",
 			"Don't bully me like that!",
+			"我喜欢你！",
 		], // 触摸提示
 		home: "Click here to go back to homepage!", // 首页提示
 		skin: ["Want to see my new outfit?", "The new outfit looks great~"], // 换装提示
 		close: "QWQ See you next time~", // 关闭提示
-		link: "https://github.com/matsuzaka-yuki/Mizuki", // 关于链接
+		link: "https://github.com/L-1ngg", // 关于链接
 	},
 };
 
