@@ -1,75 +1,21 @@
-name: Deploy to Cloudflare Pages
+name: Trigger Cloudflare Build
 
 on:
-    push:
-        branches:
-            - main
-    repository_dispatch: # 监听内容仓库的更新信号
+    # 1. 监听来自内容仓库的信号 (保持不变)
+    repository_dispatch:
         types:
             - content-updated
-    workflow_dispatch: # 支持手动触发
+    # 2. 允许手动触发 (方便测试)
+    workflow_dispatch:
 
 jobs:
-    deploy:
+    notify-cloudflare:
         runs-on: ubuntu-latest
-        permissions:
-            contents: read
-            deployments: write
         steps:
-            - name: Checkout code repository
-              uses: actions/checkout@v4
-
-            - name: Clone private content repository
+            - name: Trigger Cloudflare Deploy Hook
               run: |
-                  git clone --depth 1 https://x-access-token:${{ secrets.CONTENT_REPO_TOKEN }}@github.com/L-1ngg/Mizuki-Content.git content
-                  echo "Content repository cloned successfully"
-                  ls -la content/
-
-            - name: Setup content directories
-              run: |
-                  rm -rf src/content/posts
-                  rm -rf src/content/spec
-                  rm -rf src/data
-                  rm -rf public/images
-
-                  # 创建必要的目录
-                  mkdir -p src/content
-                  mkdir -p public
-
-                  # 创建符号链接
-                  ln -sf "$(pwd)/content/posts" src/content/posts
-                  ln -sf "$(pwd)/content/spec" src/content/spec
-                  ln -sf "$(pwd)/content/data" src/data
-                  ln -sf "$(pwd)/content/images" public/images
-
-                  # 验证
-                  echo "Content structure:"
-                  ls -la src/content/
-                  ls -la src/data/
-                  ls -la public/images/
-
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: "lts/*"
-
-            - name: Setup pnpm
-              uses: pnpm/action-setup@v4
-              with:
-                  run_install: false
-
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
-
-            - name: Build site
-              run: pnpm run build
-
-            - name: Deploy to Cloudflare Pages
-              uses: cloudflare/pages-action@v1
-              with:
-                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-                  projectName: mizuki
-                  directory: dist
-                  gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-                  branch: main
+                  echo "🚀 Received update signal from Content Repo."
+                  echo "🔔 Triggering Cloudflare build..."
+                  # 使用 curl 发送 POST 请求给 Cloudflare
+                  curl -X POST "${{ secrets.CLOUDFLARE_DEPLOY_HOOK }}"
+                  echo "✅ Signal sent!"
