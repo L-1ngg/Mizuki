@@ -6,7 +6,7 @@ on:
             - main
     repository_dispatch: # 监听内容仓库的更新信号
         types:
-            - content-updated # 必须与内容仓库发送的 event-type 一致
+            - content-updated
     workflow_dispatch: # 支持手动触发
 
 jobs:
@@ -18,6 +18,26 @@ jobs:
         steps:
             - name: Checkout code repository
               uses: actions/checkout@v4
+
+            - name: Clone private content repository
+              run: |
+                  git clone --depth 1 https://x-access-token:${{ secrets.CONTENT_REPO_TOKEN }}@github.com/L-1ngg/Mizuki-Content.git content
+                  echo "Content repository cloned successfully"
+                  ls -la content/
+
+            - name: Setup content directories
+              run: |
+                  # 创建符号链接
+                  ln -sf "$(pwd)/content/posts" src/content/posts
+                  ln -sf "$(pwd)/content/spec" src/content/spec
+                  ln -sf "$(pwd)/content/data" src/data
+                  ln -sf "$(pwd)/content/images" public/images
+
+                  # 验证
+                  echo "Content structure:"
+                  ls -la src/content/
+                  ls -la src/data/
+                  ls -la public/images/
 
             - name: Setup Node.js
               uses: actions/setup-node@v4
@@ -32,14 +52,6 @@ jobs:
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
 
-            - name: Sync content from content repository
-              run: pnpm run sync-content
-              env:
-                  ENABLE_CONTENT_SYNC: true
-                  CONTENT_REPO_URL: https://github.com/L-1ngg/Mizuki-Content.git
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  CI: true
-
             - name: Build site
               run: pnpm run build
 
@@ -48,7 +60,7 @@ jobs:
               with:
                   apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
                   accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-                  projectName: mizuki # 你的 Cloudflare Pages 项目名称
-                  directory: dist # Astro 构建输出目录
+                  projectName: mizuki
+                  directory: dist
                   gitHubToken: ${{ secrets.GITHUB_TOKEN }}
-                  branch: main # 部署分支
+                  branch: main
