@@ -18,8 +18,6 @@ jobs:
         steps:
             - name: Checkout code repository
               uses: actions/checkout@v4
-              with:
-                  submodules: recursive # 递归拉取 submodule 内容
 
             - name: Setup Node.js
               uses: actions/setup-node@v4
@@ -33,6 +31,12 @@ jobs:
 
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
+
+            - name: Sync content from content repository
+              run: pnpm run sync-content
+              env:
+                  ENABLE_CONTENT_SYNC: true
+                  CONTENT_REPO_URL: https://github.com/L-1ngg/Mizuki-Content.git
 
             - name: Build site
               run: pnpm run build
