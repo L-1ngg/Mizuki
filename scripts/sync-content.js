@@ -45,7 +45,19 @@ if (!fs.existsSync(CONTENT_DIR)) {
 
 	try {
 		console.log(`Cloning content repository: ${CONTENT_REPO_URL}`);
-		execSync(`git clone --depth 1 ${CONTENT_REPO_URL} ${CONTENT_DIR}`, {
+
+		// 在 CI 环境中使用 GITHUB_TOKEN 进行认证
+		let repoUrl = CONTENT_REPO_URL;
+		if (process.env.GITHUB_TOKEN && process.env.CI) {
+			// 将 https://github.com/user/repo.git 转换为 https://x-access-token:TOKEN@github.com/user/repo.git
+			repoUrl = CONTENT_REPO_URL.replace(
+				'https://github.com/',
+				`https://x-access-token:${process.env.GITHUB_TOKEN}@github.com/`
+			);
+			console.log("Using GitHub Token for authentication in CI environment");
+		}
+
+		execSync(`git clone --depth 1 ${repoUrl} ${CONTENT_DIR}`, {
 			stdio: "inherit",
 			cwd: rootDir,
 		});

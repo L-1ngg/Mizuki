@@ -37,6 +37,8 @@ jobs:
               env:
                   ENABLE_CONTENT_SYNC: true
                   CONTENT_REPO_URL: https://github.com/L-1ngg/Mizuki-Content.git
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  CI: true
 
             - name: Build site
               run: pnpm run build
