@@ -27,6 +27,15 @@ jobs:
 
             - name: Setup content directories
               run: |
+                  rm -rf src/content/posts
+                  rm -rf src/content/spec
+                  rm -rf src/data
+                  rm -rf public/images
+
+                  # 创建必要的目录
+                  mkdir -p src/content
+                  mkdir -p public
+
                   # 创建符号链接
                   ln -sf "$(pwd)/content/posts" src/content/posts
                   ln -sf "$(pwd)/content/spec" src/content/spec
