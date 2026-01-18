@@ -20,17 +20,18 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout
-              uses: actions/checkout@v6
-
-            - name: Setup Node.js
-              uses: actions/setup-node@v6
-              with:
-                  node-version: lts/*
+              uses: actions/checkout@v4
 
             - name: Setup pnpm
               uses: pnpm/action-setup@v4
               with:
                   run_install: false
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: lts/*
+                  cache: "pnpm"
 
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
@@ -38,24 +39,28 @@ jobs:
             - name: Run Astro Check
               run: pnpm astro check
               env:
+                  # 注意：如果没有内容文件，astro check 可能会报类型错误
+                  # 如果报错，你可能需要让它同步内容，或者由代码生成模拟类型
                   ENABLE_CONTENT_SYNC: false
 
     build:
         name: Astro Build
         runs-on: ubuntu-latest
+        needs: check
         steps:
             - name: Checkout
-              uses: actions/checkout@v6
-
-            - name: Setup Node.js
-              uses: actions/setup-node@v6
-              with:
-                  node-version: lts/*
+              uses: actions/checkout@v4
 
             - name: Setup pnpm
               uses: pnpm/action-setup@v4
               with:
                   run_install: false
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: lts/*
+                  cache: "pnpm"
 
             - name: Install dependencies
               run: pnpm install --frozen-lockfile

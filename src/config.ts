@@ -22,8 +22,8 @@ import { LinkPreset } from "./types/config";
 const SITE_LANG = "zh_CN"; // 语言代码，例如：'en', 'zh_CN', 'ja' 等。
 const SITE_TIMEZONE = 8; //设置你的网站时区 from -12 to 12 default in UTC+8
 export const siteConfig: SiteConfig = {
-	title: "Mizuki",
-	subtitle: "L1ngg's Blog",
+	title: "L1ngg",
+	subtitle: "L1ngg's personal Blog",
 	siteURL: "https://l1ngg.info", // 请替换为你的站点URL，以斜杠结尾
 	siteStartDate: "2026-01-17", // 站点开始运行日期，用于站点统计组件计算运行天数
 
@@ -61,12 +61,12 @@ export const siteConfig: SiteConfig = {
 	},
 
 	bangumi: {
-		userId: "your-bangumi-id", // 在此处设置你的Bangumi用户ID，可以设置为 "sai" 测试
+		userId: "L1ngg", // 在此处设置你的Bangumi用户ID，可以设置为 "sai" 测试
 		fetchOnDev: false, // 是否在开发环境下获取 Bangumi 数据（默认 false），获取前先执行 pnpm build 构建 json 文件
 	},
 
 	anime: {
-		mode: "local", // 番剧页面模式："bangumi" 使用Bangumi API，"local" 使用本地配置
+		mode: "bangumi", // 番剧页面模式："bangumi" 使用Bangumi API，"local" 使用本地配置
 	},
 
 	// 文章列表布局配置
@@ -121,7 +121,7 @@ export const siteConfig: SiteConfig = {
 
 		carousel: {
 			enable: true, // 为 true 时：为多张图片启用轮播。为 false 时：从数组中随机显示一张图片
-			interval: 1.5, // 轮播间隔时间（秒）
+			interval: 2.5, // 轮播间隔时间（秒）
 		},
 
 		waves: {
@@ -267,6 +267,12 @@ export const navBarConfig: NavBarConfig = {
 					external: true,
 					icon: "simple-icons:codeforces",
 				},
+				{
+					name: "Bangumi",
+					url: "https://bangumi.tv/user/l1ngg",
+					external: true,
+					icon: "mdi:television-classic",
+				},
 			],
 		},
 		{
@@ -341,8 +347,8 @@ export const navBarConfig: NavBarConfig = {
 
 export const profileConfig: ProfileConfig = {
 	avatar: "assets/images/avatar.webp", // 相对于 /src 目录。如果以 '/' 开头，则相对于 /public 目录
-	name: "L1nggのsocial media",
-	bio: "I Love you!",
+	name: "L1ngg",
+	bio: "欢迎你来看我~",
 	typewriter: {
 		enable: true, // 启用个人简介打字机效果
 		speed: 80, // 打字速度（毫秒）
@@ -429,8 +435,8 @@ export const shareConfig: ShareConfig = {
 };
 
 export const announcementConfig: AnnouncementConfig = {
-	title: "Announcement", // 公告标题
-	content: "Welcome to my blog!", // 公告内容
+	title: "喵~", // 公告标题
+	content: "你好!我是L1ngg!欢迎你来看我~", // 公告内容
 	closable: true, // 允许用户关闭公告
 	link: {
 		enable: true, // 启用链接

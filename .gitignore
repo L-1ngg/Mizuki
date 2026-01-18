@@ -25,7 +25,7 @@ pnpm-debug.log*
 /src/content/posts
 /src/content/spec
 /src/data
-/public/images
+src/content/images
 
 # Large zip files
 *.zip
@@ -44,6 +44,7 @@ yarn.lock
 *.iml
 
 cache/
+/.claude/
 fuwari/
 src/data/myself.ts
 src/pages/myself.astro
