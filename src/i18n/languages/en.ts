@@ -60,6 +60,10 @@ export const en: Translation = {
 	[Key.novel]: "Novel",
 	[Key.diary]: "Diary",
 
+	// Novel Page
+	[Key.novelTitle]: "My Novel List",
+	[Key.novelSubtitle]: "Record my reading journey",
+
 	// Anime Page
 	[Key.animeTitle]: "My Anime List",
 	[Key.animeSubtitle]: "Record my anime journey",

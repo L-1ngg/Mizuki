@@ -57,7 +57,12 @@ export const ja: Translation = {
 	[Key.publishedAt]: "公開日",
 	[Key.license]: "ライセンス",
 	[Key.anime]: "アニメ",
+	[Key.novel]: "小説",
 	[Key.diary]: "日記",
+
+	// 小説ページ
+	[Key.novelTitle]: "読書記録",
+	[Key.novelSubtitle]: "読んだ本を記録します",
 
 	// デバイスページ
 	[Key.devices]: "私のデバイス",
