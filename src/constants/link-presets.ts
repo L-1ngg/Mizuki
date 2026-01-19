@@ -28,6 +28,11 @@ export const LinkPresets: { [key in LinkPreset]: NavBarLink } = {
 		url: "/anime/",
 		icon: "material-symbols:movie",
 	},
+	[LinkPreset.Novel]: {
+		name: i18n(I18nKey.novel),
+		url: "/novel/",
+		icon: "material-symbols:menu-book",
+	},
 	[LinkPreset.Diary]: {
 		name: i18n(I18nKey.diary),
 		url: "/diary/",

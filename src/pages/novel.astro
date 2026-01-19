@@ -1,0 +1,577 @@
+---
+import ImageWrapper from "../components/misc/ImageWrapper.astro";
+import { sidebarLayoutConfig, siteConfig } from "../config";
+import I18nKey from "../i18n/i18nKey";
+import { i18n } from "../i18n/translation";
+import MainGridLayout from "../layouts/MainGridLayout.astro";
+import fs from "node:fs";
+import path from "node:path";
+import "../styles/anime.css";
+
+interface NovelItem {
+	title: string;
+	cover: string;
+	link: string;
+	status: string;
+	rating: number;
+	description: string;
+	tags: string[];
+	author: string;
+	publisher: string;
+}
+
+if (!siteConfig.featurePages.novel) {
+	return Astro.redirect("/404/");
+}
+
+const isBothSidebarMode = sidebarLayoutConfig.position === "both";
+const BANGUMI_USER_ID = siteConfig.bangumi?.userId || "your-user-id";
+
+let novelList: NovelItem[] = [];
+
+const isDev = import.meta.env.DEV;
+const shouldFetchOnDev = siteConfig.bangumi?.fetchOnDev ?? false;
+const skipLoad = isDev && !shouldFetchOnDev;
+
+if (skipLoad) {
+	console.log("[Dev] Skipping Bangumi novel data load (fetchOnDev is off). ");
+	novelList = [];
+} else {
+	try {
+		const dataPath = path.join(
+			process.cwd(),
+			"src/data/bangumi-novel-data.json",
+		);
+		if (fs.existsSync(dataPath)) {
+			const fileContent = fs.readFileSync(dataPath, "utf-8");
+			const rawData = JSON.parse(fileContent);
+			novelList = rawData.map((item: any) => ({
+				title: item.title || "Unknown",
+				cover: item.cover || "",
+				link: item.link || "",
+				status: item.status || "planned",
+				rating: Number(item.rating) || 0,
+				description: item.description || "",
+				tags: Array.isArray(item.tags) ? item.tags : [],
+				author: item.author || "",
+				publisher: item.publisher || "",
+			}));
+		} else {
+			console.warn(`Bangumi novel data file not found at ${dataPath}.`);
+			novelList = [];
+		}
+	} catch (error) {
+		console.error("Failed to load novel data:", error);
+		novelList = [];
+	}
+}
+
+function getStatusInfo(status: string) {
+	switch (status) {
+		case "watching":
+			return {
+				text: i18n(I18nKey.animeStatusWatching),
+				class: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
+				icon: "▶",
+			};
+		case "completed":
+			return {
+				text: i18n(I18nKey.animeStatusCompleted),
+				class: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+				icon: "✓",
+			};
+		case "planned":
+			return {
+				text: i18n(I18nKey.animeStatusPlanned),
+				class: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
+				icon: "❤",
+			};
+		case "onhold":
+			return {
+				text: i18n(I18nKey.animeStatusOnHold),
+				class: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
+				icon: "⏸",
+			};
+		case "dropped":
+			return {
+				text: i18n(I18nKey.animeStatusDropped),
+				class: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
+				icon: "✗",
+			};
+		default:
+			return {
+				text: status,
+				class: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
+				icon: "?",
+			};
+	}
+}
+
+const INITIAL_DISPLAY_COUNT = 24;
+const visibleNovelList = novelList.slice(0, INITIAL_DISPLAY_COUNT);
+const hiddenNovelList = novelList.slice(INITIAL_DISPLAY_COUNT);
+---
+
+<MainGridLayout
+	title={i18n(I18nKey.novel)}
+	description={i18n(I18nKey.novelSubtitle)}
+>
+	<div
+		class="flex w-full rounded-[var(--radius-large)] overflow-hidden relative min-h-32"
+	>
+		<div class="card-base anime-card-base z-10 px-9 py-6 relative w-full">
+			<div class="relative w-full mb-8">
+				<div class="mb-6">
+					<h1
+						class="text-4xl font-bold text-black/90 dark:text-white/90 mb-2 relative
+                    before:w-1 before:h-8 before:rounded-md before:bg-[var(--primary)]
+                    before:absolute before:top-1/2 before:-translate-y-1/2 before:-left-4"
+					>
+						{i18n(I18nKey.novelTitle)}
+					</h1>
+					<p class="text-black/75 dark:text-white/75">
+						{i18n(I18nKey.novelSubtitle)}
+					</p>
+				</div>
+
+				<div class="mb-6">
+					<div class="anime-filter-container flex flex-wrap gap-2">
+						<button
+							class="anime-filter-tag anime-active"
+							data-status="all"
+							>{i18n(I18nKey.animeFilterAll)}</button
+						>
+						<button class="anime-filter-tag" data-status="watching"
+							>{i18n(I18nKey.animeStatusWatching)}</button
+						>
+						<button class="anime-filter-tag" data-status="planned"
+							>{i18n(I18nKey.animeStatusPlanned)}</button
+						>
+						<button class="anime-filter-tag" data-status="completed"
+							>{i18n(I18nKey.animeStatusCompleted)}</button
+						>
+						<button class="anime-filter-tag" data-status="onhold"
+							>{i18n(I18nKey.animeStatusOnHold)}</button
+						>
+						<button class="anime-filter-tag" data-status="dropped"
+							>{i18n(I18nKey.animeStatusDropped)}</button
+						>
+					</div>
+				</div>
+			</div>
+
+			<div class="mb-8">
+				{BANGUMI_USER_ID === "your-user-id" ? (
+					<div class="text-center py-12">
+						<div class="text-5xl mb-4">😢</div>
+						<h3 class="text-xl font-medium text-black/80 dark:text-white/80 mb-2">
+							Please set your Bangumi userId in src/config.ts
+						</h3>
+					</div>
+				) : visibleNovelList.length > 0 ? (
+					<>
+						<div
+							id="novel-list-container"
+							class={`anime-grid-container grid gap-4 md:gap-6 opacity-0 transition-opacity duration-300`}
+						>
+							{visibleNovelList.map((book) => {
+								const statusInfo = getStatusInfo(book.status);
+
+								return (
+									<div
+										class="group relative bg-[var(--card-bg)] border border-[var(--line-divider)] rounded-[var(--radius-large)] overflow-hidden hover:shadow-lg"
+										data-novel-status={book.status}
+									>
+										<div class="relative anime-cover-container aspect-[2/3] overflow-hidden">
+											<a
+												href={book.link}
+												target="_blank"
+												rel="noopener noreferrer"
+												class="block w-full h-full"
+											>
+												<ImageWrapper
+													src={book.cover}
+													alt={book.title}
+													class="w-full h-full object-cover transition-transform duration-200 group-hover:scale-110"
+												/>
+											</a>
+
+											<div
+												class={`absolute top-2 left-2 px-2 py-1 rounded-md text-xs font-medium ${statusInfo.class}`}
+											>
+												<span class="mr-1">{statusInfo.icon}</span>
+												<span>{statusInfo.text}</span>
+											</div>
+
+											<div class="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1">
+												<svg
+													class="w-3 h-3 text-yellow-400"
+													fill="currentColor"
+													viewBox="0 0 20 20"
+												>
+													<path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+												</svg>
+												<span>{book.rating}</span>
+											</div>
+										</div>
+
+										<div class="p-3">
+											<h3 class="text-sm font-bold text-black/90 dark:text-white/90 mb-1 leading-tight">
+												{book.title}
+											</h3>
+
+											<div class="space-y-1 text-xs mb-2">
+												{book.author && (
+													<div class="flex justify-between items-start">
+														<span class="text-black/50 dark:text-white/50 shrink-0 mt-0.5">
+															作者
+														</span>
+														<span
+															class="text-black/70 dark:text-white/70 text-right ml-2 line-clamp-2 break-words"
+															title={book.author}
+														>
+															{book.author}
+														</span>
+													</div>
+												)}
+												{book.publisher && (
+													<div class="flex justify-between items-start">
+														<span class="text-black/50 dark:text-white/50 shrink-0 mt-0.5">
+															出版社
+														</span>
+														<span
+															class="text-black/70 dark:text-white/70 text-right ml-2 line-clamp-2 break-words"
+															title={book.publisher}
+														>
+															{book.publisher}
+														</span>
+													</div>
+												)}
+											</div>
+
+											<p
+												class="text-black/60 dark:text-white/60 text-xs mb-2 line-clamp-2"
+												title={book.description}
+											>
+												{book.description}
+											</p>
+
+											{book.tags.length > 0 && (
+												<div class="flex flex-wrap gap-1 mt-2">
+													{book.tags.map((t) => (
+														<span class="px-1.5 py-0.5 bg-[var(--btn-regular-bg)] text-black/70 dark:text-white/70 rounded text-xs">
+															{t}
+														</span>
+													))}
+												</div>
+											)}
+										</div>
+									</div>
+								);
+							})}
+						</div>
+
+						<template id="novel-lazy-store">
+							{hiddenNovelList.map((book) => {
+								const statusInfo = getStatusInfo(book.status);
+								return (
+									<div
+										class="group relative bg-[var(--card-bg)] border border-[var(--line-divider)] rounded-[var(--radius-large)] overflow-hidden hover:shadow-lg"
+										data-novel-status={book.status}
+									>
+										<div class="relative anime-cover-container aspect-[2/3] overflow-hidden">
+											<a
+												href={book.link}
+												target="_blank"
+												rel="noopener noreferrer"
+												class="block w-full h-full"
+											>
+												<ImageWrapper
+													src={book.cover}
+													alt={book.title}
+													class="w-full h-full object-cover transition-transform duration-200 group-hover:scale-110"
+												/>
+											</a>
+
+											<div
+												class={`absolute top-2 left-2 px-2 py-1 rounded-md text-xs font-medium ${statusInfo.class}`}
+											>
+												<span class="mr-1">{statusInfo.icon}</span>
+												<span>{statusInfo.text}</span>
+											</div>
+
+											<div class="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded-md text-xs font-medium flex items-center gap-1">
+												<svg
+													class="w-3 h-3 text-yellow-400"
+													fill="currentColor"
+													viewBox="0 0 20 20"
+												>
+													<path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+												</svg>
+												<span>{book.rating}</span>
+											</div>
+										</div>
+
+										<div class="p-3">
+											<h3 class="text-sm font-bold text-black/90 dark:text-white/90 mb-1 leading-tight">
+												{book.title}
+											</h3>
+											<div class="space-y-1 text-xs mb-2">
+												{book.author && (
+													<div class="flex justify-between items-start">
+														<span class="text-black/50 dark:text-white/50 shrink-0 mt-0.5">
+															作者
+														</span>
+														<span
+															class="text-black/70 dark:text-white/70 text-right ml-2 line-clamp-2 break-words"
+															title={book.author}
+														>
+															{book.author}
+														</span>
+													</div>
+												)}
+												{book.publisher && (
+													<div class="flex justify-between items-start">
+														<span class="text-black/50 dark:text-white/50 shrink-0 mt-0.5">
+															出版社
+														</span>
+														<span
+															class="text-black/70 dark:text-white/70 text-right ml-2 line-clamp-2 break-words"
+															title={book.publisher}
+														>
+															{book.publisher}
+														</span>
+													</div>
+												)}
+											</div>
+											<p
+												class="text-black/60 dark:text-white/60 text-xs mb-2 line-clamp-2"
+												title={book.description}
+											>
+												{book.description}
+											</p>
+											{book.tags.length > 0 && (
+												<div class="flex flex-wrap gap-1 mt-2">
+													{book.tags.map((t) => (
+														<span class="px-1.5 py-0.5 bg-[var(--btn-regular-bg)] text-black/70 dark:text-white/70 rounded text-xs">
+															{t}
+														</span>
+													))}
+												</div>
+											)}
+										</div>
+									</div>
+								);
+							})}
+						</template>
+
+						{hiddenNovelList.length > 0 && (
+							<div
+								id="infinite-scroll-sentinel"
+								class="w-full h-20 flex items-center justify-center mt-8"
+							>
+								<div class="anime-loading-spinner w-8 h-8 border-4 border-[var(--primary)] border-t-transparent rounded-full animate-spin" />
+							</div>
+						)}
+					</>
+				) : (
+					<div class="text-center py-12">
+						<div class="text-5xl mb-4">😢</div>
+						<h3 class="text-xl font-medium text-black/80 dark:text-white/80 mb-2">
+							{i18n(I18nKey.animeEmpty)}
+						</h3>
+						<p class="text-black/60 dark:text-white/60">
+							{i18n(I18nKey.animeEmptyBangumi)}
+						</p>
+					</div>
+				)}
+			</div>
+		</div>
+	</div>
+
+	<script is:inline define:vars={{ isBothSidebarMode }}>
+		(function () {
+			function initNovelLayout() {
+				const container = document.getElementById("novel-list-container");
+				if (!container) return false;
+				const currentLayout =
+					localStorage.getItem("postListLayout") || "list";
+				updateLayout(currentLayout, false);
+				requestAnimationFrame(() => {
+					container.classList.remove("opacity-0");
+				});
+				return true;
+			}
+
+			let retryCount = 0;
+			const maxRetries = 10;
+			function tryInit() {
+				if (initNovelLayout()) return;
+				if (retryCount < maxRetries) {
+					retryCount++;
+					const delay = Math.min(100 * Math.pow(1.5, retryCount), 1000);
+					setTimeout(tryInit, delay);
+				}
+			}
+
+			if (document.readyState === "loading") {
+				document.addEventListener("DOMContentLoaded", tryInit);
+			} else {
+				tryInit();
+			}
+
+			function updateLayout(layout, shouldAnimate = true) {
+				const listContainer = document.getElementById("novel-list-container");
+				if (!listContainer) return;
+				listContainer.dataset.currentLayout = layout;
+
+				listContainer.classList.remove("anime-list-mode", "anime-grid-mode");
+				listContainer.classList.remove(
+					"grid-cols-1",
+					"md:grid-cols-2",
+					"lg:grid-cols-3",
+				);
+
+				if (layout === "grid") {
+					listContainer.classList.add("anime-grid-mode");
+					const rightSidebar = document.querySelector(
+						".right-sidebar-container",
+					);
+					if (rightSidebar) {
+						rightSidebar.style.display = "none";
+						rightSidebar.classList.add("hidden-in-grid-mode");
+					}
+					const mainGrid = document.getElementById("main-grid");
+					if (mainGrid) {
+						mainGrid.style.gridTemplateColumns = "17.5rem 1fr";
+						mainGrid.classList.add("two-column-layout");
+					}
+				} else {
+					listContainer.classList.add("anime-list-mode");
+					listContainer.classList.add("grid-cols-1", "lg:grid-cols-2");
+					const rightSidebar = document.querySelector(
+						".right-sidebar-container",
+					);
+					if (rightSidebar) {
+						rightSidebar.style.display = "";
+						rightSidebar.classList.remove("hidden-in-grid-mode");
+					}
+					const mainGrid = document.getElementById("main-grid");
+					if (mainGrid) {
+						mainGrid.style.gridTemplateColumns = "";
+						mainGrid.classList.remove("two-column-layout");
+					}
+				}
+
+				if (!shouldAnimate) return;
+			}
+
+			window.addEventListener("layoutChange", (event) => {
+				updateLayout(event.detail.layout);
+			});
+		})();
+	</script>
+
+	<script is:inline>
+		if (typeof window.novelFilterEventListeners === "undefined") {
+			window.novelFilterEventListeners = [];
+		}
+
+		function initFilterButtons() {
+			const filterTags = document.querySelectorAll(".anime-filter-tag");
+			const sentinel = document.getElementById("infinite-scroll-sentinel");
+			const listContainer = document.getElementById("novel-list-container");
+			const lazyStore = document.getElementById("novel-lazy-store");
+			if (!listContainer) return;
+
+			window.novelFilterEventListeners.forEach((listener) => {
+				const [element, type, handler] = listener;
+				element.removeEventListener(type, handler);
+			});
+			window.novelFilterEventListeners = [];
+
+			filterTags.forEach((tag) => {
+				const clickHandler = function () {
+					if (this.classList.contains("anime-active")) return;
+
+					filterTags.forEach((t) => t.classList.remove("anime-active"));
+					this.classList.add("anime-active");
+
+					if (lazyStore && lazyStore.content.children.length > 0) {
+						const fragment = document.createDocumentFragment();
+						while (lazyStore.content.firstChild) {
+							fragment.appendChild(lazyStore.content.firstChild);
+						}
+						listContainer.appendChild(fragment);
+					}
+
+					if (sentinel) sentinel.style.display = "none";
+					const status = this.getAttribute("data-status");
+					const items = Array.from(listContainer.children).filter((item) =>
+						item.hasAttribute("data-novel-status"),
+					);
+
+					items.forEach((item) => {
+						const itemStatus = item.getAttribute("data-novel-status");
+						const shouldShow = status === "all" || itemStatus === status;
+						item.classList.toggle("anime-hidden", !shouldShow);
+					});
+				};
+
+				tag.addEventListener("click", clickHandler);
+				window.novelFilterEventListeners.push([tag, "click", clickHandler]);
+			});
+
+			if (sentinel && lazyStore) {
+				const observer = new IntersectionObserver(
+					(entries) => {
+						if (!entries[0].isIntersecting) return;
+						const BATCH_SIZE = 24;
+						if (lazyStore.content.children.length === 0) {
+							sentinel.style.display = "none";
+							observer.disconnect();
+							return;
+						}
+
+						const fragment = document.createDocumentFragment();
+						let movedCount = 0;
+						while (lazyStore.content.firstChild && movedCount < BATCH_SIZE) {
+							fragment.appendChild(lazyStore.content.firstChild);
+							movedCount++;
+						}
+						listContainer.appendChild(fragment);
+
+						if (lazyStore.content.children.length === 0) {
+							sentinel.style.display = "none";
+							observer.disconnect();
+						}
+					},
+					{ rootMargin: "200px" },
+				);
+				observer.observe(sentinel);
+			} else if (sentinel) {
+				sentinel.style.display = "none";
+			}
+		}
+
+		document.addEventListener("DOMContentLoaded", initFilterButtons);
+		function setupSwupListeners() {
+			if (window.swup) {
+				window.swup.hooks.on("content:replace", () =>
+					setTimeout(initFilterButtons, 150),
+				);
+				window.swup.hooks.on("page:view", () =>
+					setTimeout(initFilterButtons, 150),
+				);
+			}
+		}
+
+		if (typeof window !== "undefined") {
+			if (window.swup) {
+				setupSwupListeners();
+			} else {
+				document.addEventListener("swup:enable", setupSwupListeners);
+			}
+		}
+	</script>
+</MainGridLayout>

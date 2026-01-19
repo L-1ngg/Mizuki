@@ -108,11 +108,13 @@
   border-color: var(--primary);
 }
 
-.anime-grid-container [data-anime-status].anime-hidden {
+.anime-grid-container [data-anime-status].anime-hidden,
+.anime-grid-container [data-novel-status].anime-hidden {
   display: none !important;
 }
 
-.anime-grid-container [data-anime-status] {
+.anime-grid-container [data-anime-status],
+.anime-grid-container [data-novel-status] {
   transition:
     opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
     transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
@@ -121,18 +123,21 @@
   contain-intrinsic-size: 1px 350px;
 }
 
-.anime-grid-container [data-anime-status].anime-fade-out {
+.anime-grid-container [data-anime-status].anime-fade-out,
+.anime-grid-container [data-novel-status].anime-fade-out {
   opacity: 0;
   transform: scale(0.9);
   pointer-events: none;
 }
 
-.anime-grid-container [data-anime-status].anime-fade-in {
+.anime-grid-container [data-anime-status].anime-fade-in,
+.anime-grid-container [data-novel-status].anime-fade-in {
   opacity: 0;
   transform: scale(0.9);
 }
 
-.anime-grid-container [data-anime-status].anime-fade-in-active {
+.anime-grid-container [data-anime-status].anime-fade-in-active,
+.anime-grid-container [data-novel-status].anime-fade-in-active {
   opacity: 1;
   transform: scale(1);
 }

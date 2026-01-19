@@ -57,6 +57,7 @@ export const zh_TW: Translation = {
 	[Key.publishedAt]: "發布於",
 	[Key.license]: "許可協議",
 	[Key.anime]: "追番",
+	[Key.novel]: "文學",
 	[Key.diary]: "日記",
 
 	// 設備頁面
@@ -67,6 +68,11 @@ export const zh_TW: Translation = {
 	// 番劇頁面
 	[Key.animeTitle]: "我的追番記錄",
 	[Key.animeSubtitle]: "記錄我的二次元之旅",
+
+	// 小说页面
+	[Key.novelTitle]: "書籍",
+	[Key.novelSubtitle]: "記錄我看過的一些書",
+
 	[Key.animeStatusWatching]: "在看",
 	[Key.animeStatusCompleted]: "看過",
 	[Key.animeStatusPlanned]: "想看",

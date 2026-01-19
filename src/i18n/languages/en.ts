@@ -57,6 +57,7 @@ export const en: Translation = {
 	[Key.publishedAt]: "Published at",
 	[Key.license]: "License",
 	[Key.anime]: "Anime",
+	[Key.novel]: "Novel",
 	[Key.diary]: "Diary",
 
 	// Anime Page

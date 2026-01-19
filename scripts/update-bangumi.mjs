@@ -12,6 +12,11 @@ const OUTPUT_FILE = path.join(
 	"../src/data/bangumi-data.json",
 );
 
+const NOVEL_OUTPUT_FILE = path.join(
+	path.dirname(fileURLToPath(import.meta.url)),
+	"../src/data/bangumi-novel-data.json",
+);
+
 async function getUserIdFromConfig() {
 	try {
 		const configContent = await fs.readFile(CONFIG_PATH, "utf-8");
@@ -89,16 +94,49 @@ function getStudioFromInfobox(infobox) {
 	return "Unknown";
 }
 
-async function fetchCollection(userId, type) {
+function getInfoboxValue(infobox, targetKeys) {
+	if (!Array.isArray(infobox)) return "";
+
+	for (const key of targetKeys) {
+		const item = infobox.find((i) => i.key === key);
+		if (!item) continue;
+
+		if (typeof item.value === "string") {
+			return item.value;
+		}
+		if (Array.isArray(item.value)) {
+			const values = item.value
+				.map((v) => (typeof v === "string" ? v : v?.v))
+				.filter(Boolean);
+			if (values.length > 0) return values.join(" / ");
+		}
+	}
+
+	return "";
+}
+
+function getAuthorFromInfobox(infobox) {
+	return (
+		getInfoboxValue(infobox, ["作者", "著者", "原作"]) || "Unknown"
+	);
+}
+
+function getPublisherFromInfobox(infobox) {
+	return (
+		getInfoboxValue(infobox, ["出版社", "出版", "出版方", "文库"]) || "Unknown"
+	);
+}
+
+async function fetchCollection(userId, type, subjectType) {
 	let allData = [];
 	let offset = 0;
 	const limit = 50;
 	let hasMore = true;
 
-	console.log(`Fetching type: ${type}...`);
+	console.log(`Fetching subject_type=${subjectType}, type=${type}...`);
 
 	while (hasMore) {
-		const url = `${API_BASE}/v0/users/${userId}/collections?subject_type=2&type=${type}&limit=${limit}&offset=${offset}`;
+		const url = `${API_BASE}/v0/users/${userId}/collections?subject_type=${subjectType}&type=${type}&limit=${limit}&offset=${offset}`;
 		try {
 			const response = await fetch(url);
 
@@ -200,6 +238,58 @@ async function processData(items, status) {
 	return results;
 }
 
+async function processNovelData(items, status) {
+	const results = [];
+	let count = 0;
+	const total = items.length;
+
+	for (const item of items) {
+		count++;
+		process.stdout.write(
+			`[${status}] Processing progress: ${count}/${total} (${item.subject_id})\r`,
+		);
+
+		const subjectDetail = await fetchSubjectDetail(item.subject_id);
+		await delay(150);
+
+		const rating = item.rate
+			? Number.parseFloat(item.rate.toFixed(1))
+			: item.subject?.score
+				? Number.parseFloat(item.subject.score.toFixed(1))
+				: 0;
+
+		const description = (
+			subjectDetail?.summary ||
+			item.subject?.short_summary ||
+			item.subject?.name_cn ||
+			""
+		).trimStart();
+
+		const infobox = subjectDetail?.infobox;
+		const author = getAuthorFromInfobox(infobox);
+		const publisher = getPublisherFromInfobox(infobox);
+
+		results.push({
+			title:
+				item.subject?.name_cn || item.subject?.name || "Unknown Title",
+			status: status,
+			rating: rating,
+			cover: item.subject?.images?.medium || "/assets/anime/default.webp",
+			description: description,
+			tags: item.subject?.tags
+				? item.subject.tags.slice(0, 6).map((tag) => tag.name)
+				: [],
+			author: author,
+			publisher: publisher,
+			link: item.subject?.id
+				? `https://bgm.tv/subject/${item.subject.id}`
+				: "#",
+		});
+	}
+	console.log(`\n✓ Completed ${status} list processing`);
+	return results;
+}
+
 async function main() {
 	console.log("Initializing Bangumi data update script...");
 
@@ -223,12 +313,21 @@ async function main() {
 	];
 
 	let finalAnimeList = [];
+	let finalNovelList = [];
 
 	for (const c of collections) {
-		const rawData = await fetchCollection(USER_ID, c.type);
+		const rawData = await fetchCollection(USER_ID, c.type, 2);
 		if (rawData.length > 0) {
 			const processed = await processData(rawData, c.status);
 			finalAnimeList = [...finalAnimeList, ...processed];
+		}
+	}
+
+	for (const c of collections) {
+		const rawData = await fetchCollection(USER_ID, c.type, 1);
+		if (rawData.length > 0) {
+			const processed = await processNovelData(rawData, c.status);
+			finalNovelList = [...finalNovelList, ...processed];
 		}
 	}
 
@@ -242,6 +341,13 @@ async function main() {
 	await fs.writeFile(OUTPUT_FILE, JSON.stringify(finalAnimeList, null, 2));
 	console.log(`\nUpdate complete! Data saved to: ${OUTPUT_FILE}`);
 	console.log(`Total collected: ${finalAnimeList.length} anime series`);
+
+	await fs.writeFile(
+		NOVEL_OUTPUT_FILE,
+		JSON.stringify(finalNovelList, null, 2),
+	);
+	console.log(`Update complete! Data saved to: ${NOVEL_OUTPUT_FILE}`);
+	console.log(`Total collected: ${finalNovelList.length} books/novels`);
 }
 
 main().catch((err) => {

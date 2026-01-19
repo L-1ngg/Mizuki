@@ -55,11 +55,16 @@ enum I18nKey {
 	friendsCopySuccess = "friendsCopySuccess",
 	friendsTags = "friendsTags",
 	anime = "anime",
+	novel = "novel",
 	diary = "diary",
 
 	// 番剧页面
 	animeTitle = "animeTitle",
 	animeSubtitle = "animeSubtitle",
+
+	// 小说页面
+	novelTitle = "novelTitle",
+	novelSubtitle = "novelSubtitle",
 	animeStatusWatching = "animeStatusWatching",
 	animeStatusCompleted = "animeStatusCompleted",
 	animeStatusPlanned = "animeStatusPlanned",
