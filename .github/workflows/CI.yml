@@ -41,7 +41,7 @@ jobs:
               env:
                   # 注意：如果没有内容文件，astro check 可能会报类型错误
                   # 如果报错，你可能需要让它同步内容，或者由代码生成模拟类型
-                  ENABLE_CONTENT_SYNC: false
+                  ENABLE_CONTENT_SYNC: true
 
     build:
         name: Astro Build
